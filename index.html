@@ -1,0 +1,973 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>力扣高频20题 · 三刷打卡器</title>
+<style>
+/* ══════════════ CSS Variables & Reset ══════════════ */
+:root {
+  --paper: #F9F6F0;
+  --card: #FFFFFF;
+  --ink: #1E1B18;
+  --ink-light: #6B6560;
+  --ink-muted: #A39C94;
+  --border: #E6E0D8;
+  --border-light: #F0EBE3;
+  --navy: #2D3F5F;
+  --navy-light: #E8EDF4;
+  --coral: #C75B39;
+  --coral-light: #FBF0EB;
+  --sage: #6B8B6F;
+  --sage-light: #EDF4EE;
+  --amber: #C7A239;
+  --amber-light: #FCF7EB;
+  --radius: 12px;
+  --radius-sm: 8px;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.04), 0 1px 3px rgba(0,0,0,0.06);
+  --shadow: 0 1px 3px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.06);
+  --shadow-lg: 0 2px 6px rgba(0,0,0,0.04), 0 12px 32px rgba(0,0,0,0.08);
+  --font-display: Georgia, "Noto Serif SC", "Songti SC", "SimSun", serif;
+  --font-body: "PingFang SC", "Microsoft YaHei", "Hiragino Sans GB", -apple-system, sans-serif;
+  --font-mono: "SF Mono", "Cascadia Code", "Consolas", "Courier New", monospace;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { font-size: 16px; }
+body {
+  font-family: var(--font-body);
+  background: var(--paper);
+  color: var(--ink);
+  min-height: 100vh;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  background-image: radial-gradient(circle at 20% 30%, rgba(199,91,57,0.03) 0%, transparent 50%),
+                    radial-gradient(circle at 80% 70%, rgba(45,63,95,0.03) 0%, transparent 50%);
+}
+
+/* ══════════════ Layout ══════════════ */
+.app { max-width: 960px; margin: 0 auto; padding: 24px 20px 60px; }
+
+/* Header */
+.header { text-align: center; padding: 32px 0 8px; }
+.header h1 {
+  font-family: var(--font-display);
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--navy);
+  letter-spacing: 0.02em;
+}
+.header .subtitle {
+  margin-top: 6px;
+  font-size: 0.875rem;
+  color: var(--ink-muted);
+  letter-spacing: 0.04em;
+}
+
+/* Tabs */
+.tabs {
+  display: flex;
+  gap: 4px;
+  margin: 28px 0 24px;
+  background: var(--border-light);
+  border-radius: var(--radius);
+  padding: 4px;
+}
+.tab-btn {
+  flex: 1;
+  padding: 10px 20px;
+  border: none;
+  background: transparent;
+  border-radius: calc(var(--radius) - 4px);
+  cursor: pointer;
+  font-family: var(--font-body);
+  font-size: 0.925rem;
+  font-weight: 500;
+  color: var(--ink-light);
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+.tab-btn:hover { color: var(--ink); background: rgba(255,255,255,0.6); }
+.tab-btn.active { background: var(--card); color: var(--navy); font-weight: 600; box-shadow: var(--shadow-sm); }
+
+/* Cards */
+.card {
+  background: var(--card);
+  border-radius: var(--radius);
+  padding: 24px;
+  margin-bottom: 16px;
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border-light);
+  transition: box-shadow 0.2s;
+}
+.card:hover { box-shadow: var(--shadow); }
+.card-header {
+  font-family: var(--font-display);
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--navy);
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border-light);
+  display: flex; align-items: center; gap: 8px;
+}
+
+/* Formula bar */
+.formula-bar {
+  display: flex; align-items: center; justify-content: center; gap: 12px;
+  padding: 12px 24px; background: var(--navy-light); border-radius: var(--radius-sm);
+  font-family: var(--font-display); font-size: 1rem; color: var(--navy);
+  margin-bottom: 20px; flex-wrap: wrap;
+}
+.formula-bar .plus { color: var(--coral); font-weight: 700; font-size: 1.2rem; }
+.formula-bar .box {
+  background: var(--card); padding: 6px 14px; border-radius: 6px;
+  font-weight: 600; border: 1px dashed var(--border);
+}
+
+/* Form elements */
+.form-row {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
+  margin-bottom: 12px;
+}
+.form-row.single { grid-template-columns: 1fr; }
+.form-row.triple { grid-template-columns: 1fr 1fr 1fr; }
+
+.form-group { display: flex; flex-direction: column; gap: 4px; }
+.form-group label {
+  font-size: 0.8rem; font-weight: 600; color: var(--ink-light);
+  text-transform: uppercase; letter-spacing: 0.06em;
+}
+.form-group select, .form-group input, .form-group textarea {
+  padding: 10px 14px; border: 1px solid var(--border); border-radius: var(--radius-sm);
+  font-family: var(--font-body); font-size: 0.925rem; background: var(--card);
+  color: var(--ink); transition: all 0.2s; appearance: none;
+  -webkit-appearance: none; cursor: pointer;
+}
+.form-group select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M6 8L1 3h10z' fill='%236B6560'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 12px center; padding-right: 36px;
+}
+.form-group select:focus, .form-group input:focus, .form-group textarea:focus {
+  outline: none; border-color: var(--navy); box-shadow: 0 0 0 3px rgba(45,63,95,0.08);
+}
+.form-group textarea { resize: vertical; min-height: 60px; }
+.form-group .hint { font-size: 0.75rem; color: var(--coral); font-weight: 500; margin-top: 2px; }
+
+/* Pass indicator */
+.pass-badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: 0.75rem; font-weight: 600; padding: 2px 8px; border-radius: 10px;
+  margin-left: 6px;
+}
+.pass-0 { background: #F5F1EB; color: var(--ink-muted); }
+.pass-1 { background: var(--coral-light); color: var(--coral); }
+.pass-2 { background: var(--amber-light); color: var(--amber); }
+.pass-3 { background: var(--sage-light); color: var(--sage); }
+
+/* Buttons */
+.btn {
+  padding: 10px 24px; border: none; border-radius: var(--radius-sm);
+  font-family: var(--font-body); font-size: 0.9rem; font-weight: 600; cursor: pointer;
+  transition: all 0.2s ease; display: inline-flex; align-items: center; gap: 6px;
+}
+.btn-primary { background: var(--navy); color: #fff; }
+.btn-primary:hover { background: #253550; box-shadow: var(--shadow); }
+.btn-outline { background: var(--card); color: var(--navy); border: 1.5px solid var(--navy); }
+.btn-outline:hover { background: var(--navy-light); }
+.btn-ghost { background: transparent; color: var(--ink-light); }
+.btn-ghost:hover { color: var(--coral); background: var(--coral-light); }
+.btn-danger { background: transparent; color: #B0A095; font-size: 0.8rem; }
+.btn-danger:hover { color: var(--coral); }
+.btn-sm { padding: 6px 14px; font-size: 0.8rem; }
+.btn-row { display: flex; gap: 8px; margin-top: 16px; flex-wrap: wrap; }
+
+/* Table */
+.table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+table { width: 100%; border-collapse: collapse; font-size: 0.875rem; }
+thead th {
+  text-align: left; padding: 10px 12px; font-size: 0.75rem; font-weight: 600;
+  color: var(--ink-muted); text-transform: uppercase; letter-spacing: 0.05em;
+  border-bottom: 2px solid var(--border); white-space: nowrap;
+  background: var(--card); position: sticky; top: 0;
+}
+tbody td {
+  padding: 10px 12px; border-bottom: 1px solid var(--border-light);
+  white-space: nowrap;
+}
+tbody tr:hover { background: var(--navy-light); }
+tbody tr.done { background: var(--sage-light); }
+tbody tr.done:hover { background: #DDE9DE; }
+
+.priority-tag {
+  display: inline-block; padding: 2px 10px; border-radius: 10px;
+  font-size: 0.7rem; font-weight: 700; letter-spacing: 0.04em;
+}
+.p1 { background: var(--coral-light); color: var(--coral); }
+.p2 { background: var(--amber-light); color: var(--amber); }
+.p3 { background: var(--navy-light); color: var(--navy); }
+
+/* Progress ring */
+.progress-ring { display: flex; align-items: center; gap: 8px; }
+.progress-ring svg { flex-shrink: 0; }
+.progress-ring .label { font-size: 0.8rem; font-weight: 600; color: var(--ink-light); }
+
+/* Date input in table */
+.date-cell { cursor: pointer; min-width: 90px; position: relative; }
+.date-cell input[type="date"] {
+  border: none; background: transparent; font-family: var(--font-mono); font-size: 0.8rem;
+  color: var(--ink); cursor: pointer; padding: 4px 0; width: 100%;
+}
+.date-cell input[type="date"]:focus { outline: none; color: var(--navy); }
+.date-cell input[type="date"]::-webkit-calendar-picker-indicator { cursor: pointer; opacity: 0.4; }
+
+/* Stats */
+.stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 20px; }
+.stat-card { text-align: center; padding: 24px 16px; }
+.stat-card .stat-value { font-family: var(--font-display); font-size: 2.8rem; font-weight: 700; color: var(--navy); line-height: 1.1; }
+.stat-card .stat-label { font-size: 0.8rem; color: var(--ink-muted); margin-top: 6px; text-transform: uppercase; letter-spacing: 0.06em; }
+.stat-card.success .stat-value { color: var(--sage); }
+
+/* Donut chart row */
+.chart-row { display: flex; gap: 16px; flex-wrap: wrap; justify-content: center; }
+.chart-item { text-align: center; }
+.chart-item .chart-label { font-size: 0.8rem; color: var(--ink-muted); margin-top: 8px; }
+.chart-item .chart-pct { font-family: var(--font-display); font-size: 1.2rem; font-weight: 700; color: var(--navy); }
+
+/* Heatmap */
+.heatmap { display: flex; gap: 6px; flex-wrap: wrap; }
+.heatmap-day {
+  width: 32px; height: 32px; border-radius: 4px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.65rem; font-weight: 600; cursor: default;
+}
+.hm-0 { background: #F5F1EB; color: var(--ink-muted); }
+.hm-1 { background: #E6E0D8; color: var(--ink-light); }
+.hm-2 { background: #C5C0B8; color: #fff; }
+.hm-3 { background: var(--navy); color: #fff; }
+.hm-4 { background: var(--coral); color: #fff; }
+
+/* Filter chips */
+.filter-row { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+.chip {
+  padding: 6px 16px; border-radius: 20px; border: 1px solid var(--border);
+  background: var(--card); cursor: pointer; font-size: 0.8rem; font-weight: 500;
+  color: var(--ink-light); transition: all 0.2s; font-family: var(--font-body);
+}
+.chip:hover { border-color: var(--navy); color: var(--navy); }
+.chip.active { background: var(--navy); color: #fff; border-color: var(--navy); }
+
+/* Log list */
+.log-list { max-height: 240px; overflow-y: auto; }
+.log-item {
+  display: flex; align-items: center; gap: 10px; padding: 8px 0;
+  border-bottom: 1px solid var(--border-light); font-size: 0.85rem;
+}
+.log-item .log-date { font-weight: 600; color: var(--navy); min-width: 85px; font-family: var(--font-mono); font-size: 0.8rem; }
+.log-item .log-detail { color: var(--ink-light); flex: 1; }
+.log-item .log-time { color: var(--ink-muted); font-size: 0.75rem; }
+
+/* Toast */
+.toast {
+  position: fixed; top: 24px; left: 50%; transform: translateX(-50%);
+  background: var(--navy); color: #fff; padding: 10px 24px; border-radius: 20px;
+  font-size: 0.85rem; font-weight: 500; z-index: 999;
+  box-shadow: var(--shadow-lg); opacity: 0; pointer-events: none; transition: opacity 0.3s;
+}
+.toast.show { opacity: 1; }
+
+/* Section divider */
+.section-title {
+  font-size: 0.7rem; font-weight: 700; color: var(--ink-muted);
+  text-transform: uppercase; letter-spacing: 0.1em; margin: 10px 0 6px;
+  padding-left: 2px;
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .app { padding: 16px 12px 40px; }
+  .header h1 { font-size: 1.5rem; }
+  .form-row { grid-template-columns: 1fr; }
+  .form-row.triple { grid-template-columns: 1fr; }
+  .stats-grid { grid-template-columns: 1fr 1fr; }
+  .tabs { gap: 2px; }
+  .tab-btn { padding: 8px 12px; font-size: 0.8rem; }
+}
+
+/* LeetCode link */
+.problem-link {
+  color: var(--navy); text-decoration: none; cursor: pointer;
+  border-bottom: 1px dashed transparent; transition: all 0.15s;
+}
+.problem-link:hover { color: var(--coral); border-bottom-color: var(--coral); }
+.log-link {
+  color: var(--ink); text-decoration: none; cursor: pointer; transition: color 0.15s;
+}
+.log-link:hover { color: var(--coral); }
+
+/* Utility */
+.hidden { display: none !important; }
+.mt-8 { margin-top: 8px; }
+.mt-16 { margin-top: 16px; }
+.text-center { text-align: center; }
+.text-muted { color: var(--ink-muted); font-size: 0.8rem; }
+
+/* Modal overlay */
+.modal-overlay {
+  position: fixed; inset: 0; background: rgba(30,27,24,0.4); z-index: 100;
+  display: flex; align-items: center; justify-content: center;
+}
+.modal {
+  background: var(--card); border-radius: var(--radius); padding: 32px;
+  max-width: 500px; width: 90%; box-shadow: var(--shadow-lg);
+}
+.modal h3 { font-family: var(--font-display); color: var(--navy); margin-bottom: 12px; }
+.modal textarea { width: 100%; min-height: 200px; font-family: var(--font-mono); font-size: 0.75rem; padding: 12px; border: 1px solid var(--border); border-radius: var(--radius-sm); resize: vertical; }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <!-- ═══════════ HEADER ═══════════ -->
+  <header class="header">
+    <h1>力扣高频20题</h1>
+    <p class="subtitle">三 刷 打 卡 器 · 8 月 冲 刺</p>
+  </header>
+
+  <!-- ═══════════ TABS ═══════════ -->
+  <nav class="tabs">
+    <button class="tab-btn active" data-tab="daily">📋 每日打卡</button>
+    <button class="tab-btn" data-tab="tracker">📊 三刷追踪</button>
+    <button class="tab-btn" data-tab="stats">📈 进度统计</button>
+  </nav>
+
+  <!-- ═══════════════════════════ -->
+  <!-- TAB 1: 每日打卡 -->
+  <!-- ═══════════════════════════ -->
+  <div id="tab-daily" class="tab-content">
+    <!-- Formula -->
+    <div class="formula-bar">
+      <div class="box">2道旧题</div><span class="plus">+</span>
+      <div class="box">2道新题</div><span class="plus">+</span>
+      <div class="box">1道薄弱</div>
+    </div>
+
+    <!-- Date -->
+    <div class="card">
+      <div class="form-row triple">
+        <div class="form-group">
+          <label>📅 日期</label>
+          <input type="date" id="log-date">
+        </div>
+        <div class="form-group">
+          <label>⏱ 总耗时（分钟）</label>
+          <input type="number" id="log-time" placeholder="例：150" min="0" max="600">
+        </div>
+      </div>
+    </div>
+
+    <!-- 旧题复现 -->
+    <div class="card">
+      <div class="card-header">🔄 旧题复现（2道）<span style="font-weight:400;font-size:0.8rem;color:var(--ink-muted);">—— 昨天或前天做过的题</span></div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>旧题 ①</label>
+          <select id="old1"><option value="">—— 选择题目 ——</option></select>
+          <span class="hint" id="old1-hint"></span>
+        </div>
+        <div class="form-group">
+          <label>旧题 ②</label>
+          <select id="old2"><option value="">—— 选择题目 ——</option></select>
+          <span class="hint" id="old2-hint"></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 新题攻坚 -->
+    <div class="card">
+      <div class="card-header">🆕 新题攻坚（2道）<span style="font-weight:400;font-size:0.8rem;color:var(--ink-muted);">—— 还没刷过或进度落后的题</span></div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>新题 ①</label>
+          <select id="new1"><option value="">—— 选择题目 ——</option></select>
+        </div>
+        <div class="form-group">
+          <label>新题 ②</label>
+          <select id="new2"><option value="">—— 选择题目 ——</option></select>
+        </div>
+      </div>
+    </div>
+
+    <!-- 薄弱突破 -->
+    <div class="card">
+      <div class="card-header">🎯 薄弱突破（1道）<span style="font-weight:400;font-size:0.8rem;color:var(--ink-muted);">—— 总错的那类题</span></div>
+      <div class="form-row single">
+        <div class="form-group">
+          <select id="weak1"><option value="">—— 选择题目 ——</option></select>
+        </div>
+      </div>
+      <div class="form-row single">
+        <div class="form-group">
+          <label>📝 备注</label>
+          <textarea id="log-memo" placeholder="今天的心得、卡壳点、新学到的技巧..."></textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="card">
+      <div class="btn-row">
+        <button class="btn btn-primary" onclick="saveDailyLog()">💾 保存打卡</button>
+        <button class="btn btn-outline btn-sm" onclick="exportData()">📤 导出数据</button>
+        <button class="btn btn-ghost btn-sm" onclick="triggerImport()">📥 导入数据</button>
+        <button class="btn btn-danger btn-sm" onclick="resetAll()" style="margin-left:auto;">重置</button>
+      </div>
+    </div>
+
+    <!-- Recent logs -->
+    <div class="card">
+      <div class="card-header">📜 最近打卡记录</div>
+      <div class="log-list" id="recent-logs">
+        <p class="text-muted text-center" style="padding:20px;">还没有打卡记录，开始你的第一天的吧 ✍️</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════ -->
+  <!-- TAB 2: 三刷追踪表 -->
+  <!-- ═══════════════════════════ -->
+  <div id="tab-tracker" class="tab-content hidden">
+    <!-- Stats row -->
+    <div class="stats-grid" id="tracker-stats"></div>
+
+    <!-- Filter -->
+    <div class="filter-row">
+      <button class="chip active" data-filter="all">全部 (20)</button>
+      <button class="chip" data-filter="1">🔴 第一优先级 (6)</button>
+      <button class="chip" data-filter="2">🟡 第二优先级 (5)</button>
+      <button class="chip" data-filter="3">🔵 第三优先级 (9)</button>
+    </div>
+
+    <!-- Table -->
+    <div class="card" style="padding:16px;">
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>优先</th><th>题号</th><th>题目</th><th>标签</th>
+              <th>第1次</th><th>第2次</th><th>第3次</th><th>进度</th>
+            </tr>
+          </thead>
+          <tbody id="tracker-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════ -->
+  <!-- TAB 3: 进度统计 -->
+  <!-- ═══════════════════════════ -->
+  <div id="tab-stats" class="tab-content hidden">
+    <div class="stats-grid" id="overview-stats"></div>
+
+    <div class="card">
+      <div class="card-header">🎯 分优先级完成率</div>
+      <div class="chart-row" id="donut-charts"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">🔥 最近7天刷题热力图</div>
+      <div class="heatmap" id="heatmap"></div>
+      <div class="mt-8">
+        <span class="text-muted">颜色越深 = 刷题越多（含新题+旧题+薄弱，共5题/天为满）</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">📉 薄弱项分析 —— 三刷进度最少的题</div>
+      <div id="weak-analysis" class="mt-8"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<!-- Import Modal -->
+<div id="import-modal" class="modal-overlay hidden">
+  <div class="modal">
+    <h3>📥 导入数据</h3>
+    <p style="font-size:0.85rem;color:var(--ink-light);margin-bottom:12px;">粘贴之前导出的 JSON 数据，将覆盖当前所有数据。</p>
+    <textarea id="import-text" placeholder="粘贴 JSON 数据..."></textarea>
+    <div class="btn-row" style="margin-top:16px;">
+      <button class="btn btn-primary" onclick="doImport()">确认导入</button>
+      <button class="btn btn-ghost" onclick="closeImport()">取消</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ═══════════════════════════════════════════════
+   DATA LAYER
+   ═══════════════════════════════════════════════ */
+
+const STORAGE_KEY = 'lc20_tracker';
+
+const DEFAULT_PROBLEMS = {
+  "146": { name: "LRU缓存",          priority: 1, tags: ["设计", "哈希表", "链表"], slug: "lru-cache", pass1: "", pass2: "", pass3: "", notes: "" },
+  "206": { name: "反转链表",          priority: 1, tags: ["链表", "递归"], slug: "reverse-linked-list", pass1: "", pass2: "", pass3: "", notes: "" },
+  "15":  { name: "三数之和",          priority: 1, tags: ["数组", "双指针"], slug: "3sum", pass1: "", pass2: "", pass3: "", notes: "" },
+  "53":  { name: "最大子数组和",      priority: 1, tags: ["数组", "DP"], slug: "maximum-subarray", pass1: "", pass2: "", pass3: "", notes: "" },
+  "102": { name: "二叉树的层序遍历",  priority: 1, tags: ["二叉树", "BFS"], slug: "binary-tree-level-order-traversal", pass1: "", pass2: "", pass3: "", notes: "" },
+  "200": { name: "岛屿数量",          priority: 1, tags: ["DFS", "BFS", "矩阵"], slug: "number-of-islands", pass1: "", pass2: "", pass3: "", notes: "" },
+  "94":  { name: "二叉树的中序遍历",  priority: 2, tags: ["二叉树", "DFS"], slug: "binary-tree-inorder-traversal", pass1: "", pass2: "", pass3: "", notes: "" },
+  "104": { name: "二叉树的最大深度",  priority: 2, tags: ["二叉树", "DFS"], slug: "maximum-depth-of-binary-tree", pass1: "", pass2: "", pass3: "", notes: "" },
+  "226": { name: "翻转二叉树",        priority: 2, tags: ["二叉树", "递归"], slug: "invert-binary-tree", pass1: "", pass2: "", pass3: "", notes: "" },
+  "236": { name: "二叉树的最近公共祖先", priority: 2, tags: ["二叉树", "DFS"], slug: "lowest-common-ancestor-of-a-binary-tree", pass1: "", pass2: "", pass3: "", notes: "" },
+  "21":  { name: "合并两个有序链表",  priority: 2, tags: ["链表", "递归"], slug: "merge-two-sorted-lists", pass1: "", pass2: "", pass3: "", notes: "" },
+  "1":   { name: "两数之和",          priority: 3, tags: ["哈希表"], slug: "two-sum", pass1: "", pass2: "", pass3: "", notes: "" },
+  "215": { name: "第K个最大元素",     priority: 3, tags: ["堆", "快选"], slug: "kth-largest-element-in-an-array", pass1: "", pass2: "", pass3: "", notes: "" },
+  "3":   { name: "无重复字符最长子串", priority: 3, tags: ["滑动窗口", "哈希表"], slug: "longest-substring-without-repeating-characters", pass1: "", pass2: "", pass3: "", notes: "" },
+  "56":  { name: "合并区间",          priority: 3, tags: ["排序", "数组"], slug: "merge-intervals", pass1: "", pass2: "", pass3: "", notes: "" },
+  "198": { name: "打家劫舍",          priority: 3, tags: ["DP"], slug: "house-robber", pass1: "", pass2: "", pass3: "", notes: "" },
+  "155": { name: "最小栈",            priority: 3, tags: ["栈", "设计"], slug: "min-stack", pass1: "", pass2: "", pass3: "", notes: "" },
+  "141": { name: "环形链表",          priority: 3, tags: ["链表", "双指针"], slug: "linked-list-cycle", pass1: "", pass2: "", pass3: "", notes: "" },
+  "42":  { name: "接雨水",            priority: 3, tags: ["双指针", "单调栈"], slug: "trapping-rain-water", pass1: "", pass2: "", pass3: "", notes: "" },
+  "22":  { name: "括号生成",          priority: 3, tags: ["回溯", "DFS"], slug: "generate-parentheses", pass1: "", pass2: "", pass3: "", notes: "" }
+};
+
+function loadData() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) {
+      const data = JSON.parse(raw);
+      // Merge with defaults to handle schema updates
+      if (!data.problems) data.problems = {};
+      for (const [id, p] of Object.entries(DEFAULT_PROBLEMS)) {
+        if (!data.problems[id]) data.problems[id] = { ...p };
+        else {
+          // Ensure all keys exist
+          for (const k of Object.keys(p)) {
+            if (!(k in data.problems[id])) data.problems[id][k] = p[k];
+          }
+        }
+      }
+      if (!data.dailyLogs) data.dailyLogs = [];
+      return data;
+    }
+  } catch (e) { /* corrupted data, use defaults */ }
+  return { problems: JSON.parse(JSON.stringify(DEFAULT_PROBLEMS)), dailyLogs: [] };
+}
+
+function saveData(data) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+}
+
+let appData = loadData();
+
+function countPasses(p) { let c = 0; if (p.pass1) c++; if (p.pass2) c++; if (p.pass3) c++; return c; }
+function getPassClass(n) { return 'pass-' + n; }
+
+// Debounced auto-save for date inputs
+let saveTimeout;
+function autoSaveProblems() {
+  clearTimeout(saveTimeout);
+  saveTimeout = setTimeout(() => saveData(appData), 300);
+}
+
+/* ═══════════════════════════════════════════════
+   TOAST
+   ═══════════════════════════════════════════════ */
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(el._timeout);
+  el._timeout = setTimeout(() => el.classList.remove('show'), 2000);
+}
+
+/* ═══════════════════════════════════════════════
+   TAB SWITCHING
+   ═══════════════════════════════════════════════ */
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    const tabId = btn.dataset.tab;
+    document.querySelectorAll('.tab-content').forEach(tc => tc.classList.add('hidden'));
+    document.getElementById('tab-' + tabId).classList.remove('hidden');
+    if (tabId === 'tracker') renderTracker();
+    if (tabId === 'stats') renderStats();
+  });
+});
+
+/* ═══════════════════════════════════════════════
+   POPULATE SELECTS
+   ═══════════════════════════════════════════════ */
+const allSelects = ['old1', 'old2', 'new1', 'new2', 'weak1'];
+
+function populateSelects() {
+  const problems = appData.problems;
+  const sortedIds = Object.keys(problems).sort((a, b) => problems[a].priority - problems[b].priority || parseInt(a) - parseInt(b));
+
+  const optionHTML = sortedIds.map(id => {
+    const p = problems[id];
+    const pLabel = p.priority === 1 ? '🔴' : p.priority === 2 ? '🟡' : '🔵';
+    return `<option value="${id}">${pLabel} ${id}. ${p.name}</option>`;
+  }).join('');
+
+  allSelects.forEach(selId => {
+    const sel = document.getElementById(selId);
+    if (!sel) return;
+    const currentVal = sel.value;
+    sel.innerHTML = '<option value="">—— 选择题目 ——</option>' + optionHTML;
+    sel.value = currentVal;
+  });
+}
+
+// Update pass hints when old problem selects change
+['old1', 'old2'].forEach(selId => {
+  const sel = document.getElementById(selId);
+  sel.addEventListener('change', () => {
+    const hint = document.getElementById(selId + '-hint');
+    const id = sel.value;
+    if (id && appData.problems[id]) {
+      const passes = countPasses(appData.problems[id]);
+      hint.textContent = `已刷 ${passes}/3 次` + (passes === 3 ? ' ✅' : passes === 0 ? ' —— 还没开始，确定选为旧题？' : '');
+    } else {
+      hint.textContent = '';
+    }
+  });
+});
+
+/* ═══════════════════════════════════════════════
+   DAILY LOG
+   ═══════════════════════════════════════════════ */
+function renderRecentLogs() {
+  const container = document.getElementById('recent-logs');
+  const logs = appData.dailyLogs.slice().sort((a, b) => b.date.localeCompare(a.date)).slice(0, 7);
+
+  if (logs.length === 0) {
+    container.innerHTML = '<p class="text-muted text-center" style="padding:20px;">还没有打卡记录，开始你的第一天吧 ✍️</p>';
+    return;
+  }
+
+  container.innerHTML = logs.map(log => {
+    const allProblems = [...(log.oldProblems || []), ...(log.newProblems || []), ...(log.weakProblem ? [log.weakProblem] : [])];
+    const names = allProblems.map(id => {
+      const p = appData.problems[id];
+      const slug = p ? p.slug : '';
+      const label = p ? `${id}.${p.name}` : id;
+      return p ? `<a class="log-link" href="https://leetcode.cn/problems/${slug}/" target="_blank" title="在力扣中打开">${label}</a>` : label;
+    }).join('、');
+
+    return `<div class="log-item">
+      <span class="log-date">${log.date}</span>
+      <span class="log-detail">${names || '无记录'}</span>
+      <span class="log-time">${log.totalTime || 0}min</span>
+      ${log.memo ? `<span style="font-size:0.75rem;color:var(--ink-muted);">💬 ${log.memo.substring(0, 30)}</span>` : ''}
+    </div>`;
+  }).join('');
+}
+
+function saveDailyLog() {
+  const date = document.getElementById('log-date').value;
+  const totalTime = parseInt(document.getElementById('log-time').value) || 0;
+  const oldProblems = [document.getElementById('old1').value, document.getElementById('old2').value].filter(Boolean);
+  const newProblems = [document.getElementById('new1').value, document.getElementById('new2').value].filter(Boolean);
+  const weakProblem = document.getElementById('weak1').value;
+  const memo = document.getElementById('log-memo').value.trim();
+
+  if (!date) { toast('请先选择日期 📅'); return; }
+  if (oldProblems.length === 0 && newProblems.length === 0 && !weakProblem) {
+    toast('至少选一道题吧 😅'); return;
+  }
+
+  // Remove existing log for this date (update)
+  appData.dailyLogs = appData.dailyLogs.filter(l => l.date !== date);
+
+  // Add new log
+  appData.dailyLogs.push({
+    date,
+    oldProblems,
+    newProblems,
+    weakProblem: weakProblem || '',
+    totalTime,
+    memo
+  });
+
+  // Auto-update problem pass dates based on this log entry
+  // Any problem that appears in this log gets a pass date if it doesn't already have one
+  const allIds = [...oldProblems, ...newProblems, ...(weakProblem ? [weakProblem] : [])];
+  allIds.forEach(id => {
+    const p = appData.problems[id];
+    if (!p) return;
+    if (!p.pass1) p.pass1 = date;
+    else if (!p.pass2) p.pass2 = date;
+    else if (!p.pass3) p.pass3 = date;
+    // If all 3 passes filled, don't overwrite
+  });
+
+  saveData(appData);
+  renderRecentLogs();
+  toast('打卡已保存 ✅');
+
+  // Clear form
+  allSelects.forEach(sId => { document.getElementById(sId).value = ''; });
+  document.getElementById('log-time').value = '';
+  document.getElementById('log-memo').value = '';
+  ['old1-hint', 'old2-hint'].forEach(h => { document.getElementById(h).textContent = ''; });
+}
+
+/* ═══════════════════════════════════════════════
+   TRACKER TABLE
+   ═══════════════════════════════════════════════ */
+let trackerFilter = 'all';
+
+function renderTrackerStats() {
+  const problems = appData.problems;
+  const total = Object.keys(problems).length;
+  let completed = 0, p1c = 0, p2c = 0, p3c = 0, p1t = 0, p2t = 0, p3t = 0;
+
+  for (const [id, p] of Object.entries(problems)) {
+    const passes = countPasses(p);
+    if (passes === 3) completed++;
+    if (p.priority === 1) { p1t++; if (passes === 3) p1c++; }
+    if (p.priority === 2) { p2t++; if (passes === 3) p2c++; }
+    if (p.priority === 3) { p3t++; if (passes === 3) p3c++; }
+  }
+
+  document.getElementById('tracker-stats').innerHTML = `
+    <div class="card stat-card"><div class="stat-value">${completed}/${total}</div><div class="stat-label">总三刷完成</div></div>
+    <div class="card stat-card"><div class="stat-value" style="color:var(--coral);">${p1c}/${p1t}</div><div class="stat-label">🔴 第一优先级</div></div>
+    <div class="card stat-card"><div class="stat-value" style="color:var(--amber);">${p2c}/${p2t}</div><div class="stat-label">🟡 第二优先级</div></div>
+    <div class="card stat-card"><div class="stat-value">${p3c}/${p3t}</div><div class="stat-label">🔵 第三优先级</div></div>
+  `;
+}
+
+function renderTracker() {
+  renderTrackerStats();
+
+  const entries = Object.entries(appData.problems);
+  const filtered = trackerFilter === 'all'
+    ? entries
+    : entries.filter(([_, p]) => p.priority === parseInt(trackerFilter));
+
+  const sorted = filtered.sort((a, b) => a[1].priority - b[1].priority || parseInt(a[0]) - parseInt(b[0]));
+
+  const tbody = document.getElementById('tracker-tbody');
+  tbody.innerHTML = sorted.map(([id, p]) => {
+    const passes = countPasses(p);
+    const isDone = passes === 3;
+    const pLabel = p.priority === 1 ? '🔴 P1' : p.priority === 2 ? '🟡 P2' : '🔵 P3';
+    const pClass = p.priority === 1 ? 'p1' : p.priority === 2 ? 'p2' : 'p3';
+
+    // SVG progress ring
+    const r = 16, circ = 2 * Math.PI * r;
+    const colors = ['#D0CBC4', '#C75B39', '#C7A239', '#6B8B6F'];
+    const strokeColor = colors[passes];
+    const offset = circ - (passes / 3) * circ;
+    const ringHTML = `<svg width="40" height="40" viewBox="0 0 40 40">
+      <circle cx="20" cy="20" r="${r}" fill="none" stroke="#E6E0D8" stroke-width="4"/>
+      <circle cx="20" cy="20" r="${r}" fill="none" stroke="${strokeColor}" stroke-width="4"
+        stroke-dasharray="${circ}" stroke-dashoffset="${offset}" stroke-linecap="round"
+        transform="rotate(-90 20 20)" style="transition: stroke-dashoffset 0.5s ease;"/>
+      <text x="20" y="21" text-anchor="middle" font-size="11" font-weight="700" fill="${strokeColor}" style="font-family:var(--font-display);">${passes}/3</text>
+    </svg>`;
+
+    return `<tr class="${isDone ? 'done' : ''}" data-priority="${p.priority}">
+      <td><span class="priority-tag ${pClass}">${pLabel}</span></td>
+      <td><a class="problem-link" href="https://leetcode.cn/problems/${p.slug || ''}/" target="_blank" title="在力扣中打开"><strong>${id}</strong></a></td>
+      <td><a class="problem-link" href="https://leetcode.cn/problems/${p.slug || ''}/" target="_blank" title="在力扣中打开">${p.name}</a>${p.notes ? ` <span style="font-size:0.7rem;color:var(--coral);">📌${p.notes.substring(0, 15)}</span>` : ''}</td>
+      <td style="font-size:0.75rem;color:var(--ink-light);">${(p.tags || []).join(' · ')}</td>
+      <td class="date-cell"><input type="date" value="${p.pass1 || ''}" onchange="updatePass('${id}','pass1',this.value)" onfocus="this.showPicker()"></td>
+      <td class="date-cell"><input type="date" value="${p.pass2 || ''}" onchange="updatePass('${id}','pass2',this.value)" onfocus="this.showPicker()"></td>
+      <td class="date-cell"><input type="date" value="${p.pass3 || ''}" onchange="updatePass('${id}','pass3',this.value)" onfocus="this.showPicker()"></td>
+      <td><div class="progress-ring">${ringHTML}</div></td>
+    </tr>`;
+  }).join('');
+}
+
+function updatePass(id, field, value) {
+  if (appData.problems[id]) {
+    appData.problems[id][field] = value;
+    autoSaveProblems();
+    renderTrackerStats();
+    // Re-render the ring for this row only (simple approach: re-render all)
+    // Debounce re-render
+    clearTimeout(window._trackerRenderTimeout);
+    window._trackerRenderTimeout = setTimeout(renderTracker, 200);
+  }
+}
+
+// Filter chips
+document.querySelectorAll('#tab-tracker .chip').forEach(chip => {
+  chip.addEventListener('click', () => {
+    document.querySelectorAll('#tab-tracker .chip').forEach(c => c.classList.remove('active'));
+    chip.classList.add('active');
+    trackerFilter = chip.dataset.filter;
+    renderTracker();
+  });
+});
+
+/* ═══════════════════════════════════════════════
+   STATS
+   ═══════════════════════════════════════════════ */
+function renderStats() {
+  const problems = appData.problems;
+  const entries = Object.entries(problems);
+  const total = entries.length;
+  let completed = 0, p1c = 0, p2c = 0, p3c = 0, p1t = 0, p2t = 0, p3t = 0;
+
+  for (const [_, p] of entries) {
+    const passes = countPasses(p);
+    if (passes === 3) completed++;
+    if (p.priority === 1) { p1t++; if (passes === 3) p1c++; }
+    if (p.priority === 2) { p2t++; if (passes === 3) p2c++; }
+    if (p.priority === 3) { p3t++; if (passes === 3) p3c++; }
+  }
+
+  const pct = total > 0 ? Math.round((completed / total) * 100) : 0;
+
+  // Overview
+  document.getElementById('overview-stats').innerHTML = `
+    <div class="card stat-card success"><div class="stat-value">${pct}%</div><div class="stat-label">总体三刷完成率</div></div>
+    <div class="card stat-card"><div class="stat-value">${total}</div><div class="stat-label">题目总数</div></div>
+    <div class="card stat-card"><div class="stat-value">${completed}</div><div class="stat-label">已完全掌握 🟢</div></div>
+    <div class="card stat-card"><div class="stat-value">${appData.dailyLogs.length}</div><div class="stat-label">累计打卡天数</div></div>
+  `;
+
+  // Donut charts
+  const donutData = [
+    { label: '🔴 P1', done: p1c, total: p1t, color: '#C75B39' },
+    { label: '🟡 P2', done: p2c, total: p2t, color: '#C7A239' },
+    { label: '🔵 P3', done: p3c, total: p3t, color: '#2D3F5F' }
+  ];
+
+  document.getElementById('donut-charts').innerHTML = donutData.map(d => {
+    const pctVal = d.total > 0 ? Math.round((d.done / d.total) * 100) : 0;
+    const r = 28, circ = 2 * Math.PI * r;
+    const offset = circ - (pctVal / 100) * circ;
+    return `<div class="chart-item">
+      <svg width="80" height="80" viewBox="0 0 80 80">
+        <circle cx="40" cy="40" r="${r}" fill="none" stroke="#E6E0D8" stroke-width="6"/>
+        <circle cx="40" cy="40" r="${r}" fill="none" stroke="${d.color}" stroke-width="6"
+          stroke-dasharray="${circ}" stroke-dashoffset="${offset}" stroke-linecap="round"
+          transform="rotate(-90 40 40)" style="transition: stroke-dashoffset 0.6s ease;"/>
+        <text x="40" y="44" text-anchor="middle" font-size="14" font-weight="700" fill="${d.color}" style="font-family:var(--font-display);">${pctVal}%</text>
+      </svg>
+      <div class="chart-label">${d.label}<br>${d.done}/${d.total}</div>
+    </div>`;
+  }).join('');
+
+  // Heatmap (last 7 days)
+  const today = new Date();
+  const days = [];
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date(today);
+    d.setDate(d.getDate() - i);
+    const dateStr = d.toISOString().split('T')[0];
+    const log = appData.dailyLogs.find(l => l.date === dateStr);
+    const count = log ? (log.oldProblems || []).length + (log.newProblems || []).length + (log.weakProblem ? 1 : 0) : 0;
+    const level = count >= 5 ? 4 : count >= 4 ? 3 : count >= 2 ? 2 : count >= 1 ? 1 : 0;
+    days.push({ dateStr, count, level, label: `${d.getMonth()+1}/${d.getDate()}` });
+  }
+
+  document.getElementById('heatmap').innerHTML = days.map(d => `
+    <div class="heatmap-day hm-${d.level}" title="${d.dateStr}: ${d.count}题">${d.label}</div>
+  `).join('');
+
+  // Weak analysis
+  const weakEntries = entries
+    .map(([id, p]) => ({ id, ...p, passes: countPasses(p) }))
+    .sort((a, b) => a.passes - b.passes || a.priority - b.priority)
+    .slice(0, 6);
+
+  document.getElementById('weak-analysis').innerHTML = weakEntries.map(e => {
+    const remain = 3 - e.passes;
+    const urgency = remain === 3 ? '🔴 还没开始' : remain === 2 ? '🟡 差2次' : remain === 1 ? '🔵 差1次' : '✅ 已完成';
+    return `<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border-light);">
+      <span class="priority-tag ${e.priority === 1 ? 'p1' : e.priority === 2 ? 'p2' : 'p3'}">P${e.priority}</span>
+      <strong>${e.id}. ${e.name}</strong>
+      <span style="font-size:0.8rem;color:var(--ink-muted);">${(e.tags||[]).slice(0,2).join(' · ')}</span>
+      <span style="margin-left:auto;font-weight:600;font-size:0.8rem;color:${remain===0?'var(--sage)':'var(--coral)'};">${urgency}</span>
+    </div>`;
+  }).join('') || '<p class="text-muted">暂无数据</p>';
+}
+
+/* ═══════════════════════════════════════════════
+   EXPORT / IMPORT / RESET
+   ═══════════════════════════════════════════════ */
+function exportData() {
+  const blob = new Blob([JSON.stringify(appData, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `lc20-backup-${new Date().toISOString().split('T')[0]}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+  toast('数据已导出 📤');
+}
+
+function triggerImport() {
+  document.getElementById('import-modal').classList.remove('hidden');
+}
+
+function closeImport() {
+  document.getElementById('import-modal').classList.add('hidden');
+  document.getElementById('import-text').value = '';
+}
+
+function doImport() {
+  try {
+    const raw = document.getElementById('import-text').value.trim();
+    if (!raw) { toast('请粘贴数据'); return; }
+    const data = JSON.parse(raw);
+    if (!data.problems) { toast('数据格式不正确 ❌'); return; }
+    appData = data;
+    saveData(appData);
+    closeImport();
+    refreshAll();
+    toast('数据已导入 ✅');
+  } catch (e) {
+    toast('JSON 解析失败，请检查格式 ❌');
+  }
+}
+
+function resetAll() {
+  if (!confirm('⚠️ 确定要重置所有数据吗？\n\n这将清空所有打卡记录和三刷进度。\n建议先导出备份。')) return;
+  if (!confirm('再次确认：真的要重置吗？此操作不可恢复。')) return;
+  appData = { problems: JSON.parse(JSON.stringify(DEFAULT_PROBLEMS)), dailyLogs: [] };
+  saveData(appData);
+  refreshAll();
+  toast('已重置 🔄');
+}
+
+/* ═══════════════════════════════════════════════
+   INIT
+   ═══════════════════════════════════════════════ */
+function refreshAll() {
+  populateSelects();
+  renderRecentLogs();
+  renderTracker();
+  renderStats();
+}
+
+// Set today's date
+const todayStr = new Date().toISOString().split('T')[0];
+document.getElementById('log-date').value = todayStr;
+
+// Init
+populateSelects();
+renderRecentLogs();
+
+// Global error handling for date picker showPicker (not all browsers)
+// already handled via onfocus fallback
+
+console.log('📋 力扣高频20题 · 三刷打卡器 已就绪');
+console.log('💾 数据存储在浏览器 localStorage');
+console.log('📤 建议每周导出一次数据备份');
+</script>
+</body>
+</html>
