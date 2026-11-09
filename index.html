@@ -359,6 +359,7 @@ tbody tr.done:hover { background: #DDE9DE; }
         <div class="form-group">
           <label>📅 日期</label>
           <input type="date" id="log-date">
+          <span class="hint" id="date-hint"></span>
         </div>
         <div class="form-group">
           <label>⏱ 总耗时（分钟）</label>
@@ -569,6 +570,24 @@ let appData = loadData();
 function countPasses(p) { let c = 0; if (p.pass1) c++; if (p.pass2) c++; if (p.pass3) c++; return c; }
 function getPassClass(n) { return 'pass-' + n; }
 
+// 计算某条打卡记录包含的题目总数（旧题+新题+薄弱）
+function problemCountOfLog(log) {
+  return (log.oldProblems || []).length + (log.newProblems || []).length + (log.weakProblem ? 1 : 0);
+}
+// 计算某个日期下所有打卡记录累计的题目总数（支持一天多次追加）
+function countProblemsInDate(date) {
+  return appData.dailyLogs.filter(l => l.date === date).reduce((s, l) => s + problemCountOfLog(l), 0);
+}
+// 在日期输入框下提示该日期已记录的题量
+function updateDateHint() {
+  const date = document.getElementById('log-date').value;
+  const el = document.getElementById('date-hint');
+  if (!el) return;
+  if (!date) { el.textContent = ''; return; }
+  const n = countProblemsInDate(date);
+  el.textContent = n > 0 ? `该日期已记录 ${n} 题，保存后会追加（不覆盖）` : '';
+}
+
 // Debounced auto-save for date inputs
 let saveTimeout;
 function autoSaveProblems() {
@@ -646,7 +665,7 @@ function populateSelects() {
    ═══════════════════════════════════════════════ */
 function renderRecentLogs() {
   const container = document.getElementById('recent-logs');
-  const logs = appData.dailyLogs.slice().sort((a, b) => b.date.localeCompare(a.date)).slice(0, 7);
+  const logs = appData.dailyLogs.slice().sort((a, b) => b.date.localeCompare(a.date));
 
   if (logs.length === 0) {
     container.innerHTML = '<p class="text-muted text-center" style="padding:20px;">还没有打卡记录，开始你的第一天吧 ✍️</p>';
@@ -665,7 +684,7 @@ function renderRecentLogs() {
     return `<div class="log-item">
       <span class="log-date">${log.date}</span>
       <span class="log-detail">${names || '无记录'}</span>
-      <span class="log-time">${log.totalTime || 0}min</span>
+      <span class="log-time">${problemCountOfLog(log)}题 · ${log.totalTime || 0}min</span>
       ${log.memo ? `<span style="font-size:0.75rem;color:var(--ink-muted);">💬 ${log.memo.substring(0, 30)}</span>` : ''}
     </div>`;
   }).join('');
@@ -684,10 +703,8 @@ function saveDailyLog() {
     toast('至少选一道题吧 😅'); return;
   }
 
-  // Remove existing log for this date (update)
-  appData.dailyLogs = appData.dailyLogs.filter(l => l.date !== date);
-
-  // Add new log
+  // 累积打卡：同一天多次保存会追加新记录，而不是覆盖旧记录，
+  // 这样当天超出计划的题量也能完整保留、方便回查。
   appData.dailyLogs.push({
     date,
     oldProblems,
@@ -711,7 +728,7 @@ function saveDailyLog() {
 
   saveData(appData);
   renderRecentLogs();
-  toast('打卡已保存 ✅');
+  toast('打卡已保存 ✅ · 今日累计 ' + countProblemsInDate(date) + ' 题');
 
   // Clear form
   allSelects.forEach(sId => { document.getElementById(sId).value = ''; });
@@ -835,7 +852,7 @@ function renderStats() {
     <div class="card stat-card success"><div class="stat-value">${pct}%</div><div class="stat-label">总体三刷完成率</div></div>
     <div class="card stat-card"><div class="stat-value">${total}</div><div class="stat-label">题目总数</div></div>
     <div class="card stat-card"><div class="stat-value">${completed}</div><div class="stat-label">已完全掌握 🟢</div></div>
-    <div class="card stat-card"><div class="stat-value">${appData.dailyLogs.length}</div><div class="stat-label">累计打卡天数</div></div>
+    <div class="card stat-card"><div class="stat-value">${new Set(appData.dailyLogs.map(l => l.date)).size}</div><div class="stat-label">累计打卡天数</div></div>
   `;
 
   // Donut charts
@@ -868,8 +885,7 @@ function renderStats() {
     const d = new Date(today);
     d.setDate(d.getDate() - i);
     const dateStr = d.toISOString().split('T')[0];
-    const log = appData.dailyLogs.find(l => l.date === dateStr);
-    const count = log ? (log.oldProblems || []).length + (log.newProblems || []).length + (log.weakProblem ? 1 : 0) : 0;
+    const count = countProblemsInDate(dateStr);
     const level = count >= 5 ? 4 : count >= 4 ? 3 : count >= 2 ? 2 : count >= 1 ? 1 : 0;
     days.push({ dateStr, count, level, label: `${d.getMonth()+1}/${d.getDate()}` });
   }
@@ -957,10 +973,12 @@ function refreshAll() {
 // Set today's date
 const todayStr = new Date().toISOString().split('T')[0];
 document.getElementById('log-date').value = todayStr;
+document.getElementById('log-date').addEventListener('change', updateDateHint);
 
 // Init
 populateSelects();
 renderRecentLogs();
+updateDateHint();
 
 // Global error handling for date picker showPicker (not all browsers)
 // already handled via onfocus fallback
